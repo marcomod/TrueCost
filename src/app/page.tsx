@@ -1,67 +1,56 @@
 "use client";
 
-import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import SearchBar from "@/component/SearchBar";
+import SearchResults from "@/component/SearchResults";
 
-const EXAMPLES = [
-  "ps5",
-  "airpods pro",
-  "keurig coffee maker",
-  "nike dunks",
-];
+const EXAMPLES = ["ps5", "airpods pro", "keurig coffee maker", "nike dunks"];
 
 export default function HomePage() {
   const router = useRouter();
   const [query, setQuery] = useState("");
 
-  function onSubmit(e: FormEvent) {
-    e.preventDefault();
+  function onSubmit() {
     const q = query.trim();
     if (!q) return;
     router.push(`/item/${encodeURIComponent(q)}`);
   }
 
   return (
-    <main className="min-h-screen bg-zinc-50 px-4 py-10">
-      <div className="mx-auto w-full max-w-3xl space-y-8">
-        <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
-            TrueCost
+    <main className="px-4 py-10 sm:py-14">
+      <div className="mx-auto w-full max-w-6xl">
+        <div className="mx-auto max-w-3xl text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/60 px-3 py-1 text-xs font-semibold text-zinc-700 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5 dark:text-zinc-200">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            Personal finance, re-framed
+          </div>
+
+          <h1 className="mt-5 text-4xl font-semibold tracking-tight text-zinc-950 dark:text-white sm:text-5xl">
+            See the{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 via-fuchsia-500 to-emerald-500">
+              true cost
+            </span>{" "}
+            of what you buy.
           </h1>
-          <p className="text-sm text-slate-600">
-            Type what you want to buy. See the real cost over time.
+          <p className="mt-4 text-base text-zinc-600 dark:text-zinc-300">
+            Search an item, pick a price, and compare “buying it” vs investing
+            instead.
           </p>
+
+          <div className="mt-8">
+            <SearchBar
+              value={query}
+              onChange={setQuery}
+              onSubmit={onSubmit}
+              examples={EXAMPLES}
+            />
+          </div>
         </div>
 
-        <form onSubmit={onSubmit} className="space-y-3">
-          <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder='e.g. "ps5"'
-              className="w-full bg-transparent text-sm text-slate-900 outline-none"
-            />
-            <button
-              type="submit"
-              className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-            >
-              Search
-            </button>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-2">
-            {EXAMPLES.map((ex) => (
-              <button
-                key={ex}
-                type="button"
-                onClick={() => setQuery(ex)}
-                className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
-              >
-                {ex}
-              </button>
-            ))}
-          </div>
-        </form>
+        <div className="mt-10">
+          <SearchResults />
+        </div>
       </div>
     </main>
   );

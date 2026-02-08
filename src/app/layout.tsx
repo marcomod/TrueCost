@@ -22,10 +22,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className="h-full">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} min-h-dvh antialiased`}
       >
+        <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+          <div className="absolute -top-24 left-1/2 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-sky-500/15 blur-3xl" />
+          <div className="absolute top-40 left-1/4 h-[360px] w-[560px] -translate-x-1/2 rounded-full bg-fuchsia-500/10 blur-3xl" />
+          <div className="absolute bottom-0 right-0 h-[420px] w-[640px] translate-x-1/4 rounded-full bg-emerald-500/10 blur-3xl" />
+        </div>
+
         <Header />
         {children}
       </body>
