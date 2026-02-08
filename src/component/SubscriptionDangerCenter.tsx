@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { addSubscription, getSubscriptionDangerData } from "@/app/actions";
+import {
+  addSubscription,
+  deleteSubscription,
+  getSubscriptionDangerData,
+} from "@/app/actions";
 import {
   Area,
   AreaChart,
@@ -186,6 +190,7 @@ export default function SubscriptionDangerCenter() {
   const [addCadence, setAddCadence] = useState<"monthly" | "yearly">("monthly");
   const [addBusy, setAddBusy] = useState(false);
   const [addMsg, setAddMsg] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   async function refresh() {
     setLoading(true);
@@ -471,8 +476,32 @@ export default function SubscriptionDangerCenter() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm font-semibold text-zinc-950 dark:text-white tabular-nums">
-                        {formatMoneyWithCurrency(s.mCost, currency)}/mo
+                      <div className="flex items-center justify-end gap-2">
+                        <div className="text-sm font-semibold text-zinc-950 dark:text-white tabular-nums">
+                          {formatMoneyWithCurrency(s.mCost, currency)}/mo
+                        </div>
+                        <button
+                          type="button"
+                          disabled={deletingId === s.id}
+                          onClick={async () => {
+                            if (
+                              typeof window !== "undefined" &&
+                              !window.confirm(`Delete “${s.name}”?`)
+                            )
+                              return;
+                            setDeletingId(s.id);
+                            try {
+                              await deleteSubscription(s.id);
+                              await refresh();
+                            } finally {
+                              setDeletingId(null);
+                            }
+                          }}
+                          className="rounded-xl border border-black/10 bg-white/60 px-2 py-1 text-[11px] font-semibold text-zinc-700 shadow-sm transition hover:bg-white/80 disabled:opacity-60 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10"
+                          aria-label={`Delete subscription ${s.name}`}
+                        >
+                          {deletingId === s.id ? "Deleting…" : "Delete"}
+                        </button>
                       </div>
                       <div className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400 tabular-nums">
                         Work time:{" "}

@@ -17,6 +17,7 @@ import crypto from "node:crypto";
 const DEMO_USER_ID = "demo-user";
 const SESSION_COOKIE = "tc_session";
 const SESSION_TTL_DAYS = 30;
+const SEED_DEMO_SUBSCRIPTIONS = process.env.TC_SEED_DEMO_SUBSCRIPTIONS === "1";
 
 type CurrencyCode = "CAD" | "USD";
 
@@ -260,7 +261,10 @@ export async function addExpense(input: {
   // To make Insights reflect what the user adds in Dashboard, we also upsert a
   // subscription row when category === "subscriptions".
   if (input.category === "subscriptions") {
-    const name = (input.note ?? "").trim() || "Subscription";
+    const name = (input.note ?? "").trim();
+    // Avoid creating confusing placeholder subscriptions if the note is blank.
+    // Users can always add a subscription directly in Insights.
+    if (!name) return;
     const noteLower = name.toLowerCase();
     const cadence: "monthly" | "yearly" =
       noteLower.includes("yearly") ||
@@ -443,7 +447,8 @@ export async function addSubscription(input: {
 
 export async function listSubscriptions() {
   const userId = await getCurrentUserId();
-  if (userId === DEMO_USER_ID) await ensureDemoSubscriptions();
+  if (userId === DEMO_USER_ID && SEED_DEMO_SUBSCRIPTIONS)
+    await ensureDemoSubscriptions();
 
   const rows = await db
     .select()
@@ -452,7 +457,12 @@ export async function listSubscriptions() {
     .orderBy(desc(subscriptions.createdAt))
     .limit(50);
 
-  return rows.map((r) => ({
+  const filteredRows =
+    userId === DEMO_USER_ID && !SEED_DEMO_SUBSCRIPTIONS
+      ? rows.filter((r) => !isDemoSeedSubscriptionRow(r))
+      : rows;
+
+  return filteredRows.map((r) => ({
     id: r.id,
     name: r.name,
     amount: r.amount ?? 0,
@@ -463,10 +473,28 @@ export async function listSubscriptions() {
   }));
 }
 
+function isDemoSeedSubscriptionRow(row: {
+  name: string;
+  amount: number;
+  cadence: string;
+}) {
+  const demoSeeds = [
+    { name: "Spotify Premium", amount: 11.99, cadence: "monthly" },
+    { name: "Netflix", amount: 15.49, cadence: "monthly" },
+    { name: "iCloud Storage", amount: 2.99, cadence: "monthly" },
+  ] as const;
+
+  return demoSeeds.some(
+    (seed) =>
+      row.name === seed.name &&
+      row.cadence === seed.cadence &&
+      Math.abs((row.amount ?? 0) - seed.amount) < 0.0001,
+  );
+}
+
 export async function getSubscriptionDangerData() {
   const userId = await getCurrentUserId();
   const settings = await getSettings(userId);
-  if (userId === DEMO_USER_ID) await ensureDemoSubscriptions();
   const subs = await listSubscriptions();
   const income = computeIncomeThisPeriod(settings);
   return {
@@ -479,6 +507,14 @@ export async function getSubscriptionDangerData() {
     expectedAnnualReturn: settings.expectedAnnualReturn,
     subscriptions: subs,
   };
+}
+
+export async function deleteSubscription(subscriptionId: string) {
+  if (!subscriptionId) return;
+  const userId = await getCurrentUserId();
+  await db
+    .delete(subscriptions)
+    .where(and(eq(subscriptions.id, subscriptionId), eq(subscriptions.userId, userId)));
 }
 
 export async function getDashboardSummary() {
