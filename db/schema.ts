@@ -13,3 +13,23 @@ export const paychecks = sqliteTable("paychecks", {
   startDate: text("start_date").notNull(), // ISO date
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 });
+
+export const expenses = sqliteTable("expenses", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  amount: real("amount").notNull(),
+  category: text("category").notNull(),
+  date: text("date").notNull(), // ISO date "YYYY-MM-DD"
+  note: text("note"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+});
+
+export const subscriptions = sqliteTable("subscriptions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  name: text("name").notNull(),
+  amount: real("amount").notNull(),
+  cadence: text("cadence").notNull(), // "monthly" | "yearly"
+  nextBillingDate: text("next_billing_date"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+});
