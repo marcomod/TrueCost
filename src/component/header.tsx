@@ -18,6 +18,7 @@ export default function Header({
     { href: "/", label: "Home" },
     { href: "/dashboard", label: "Dashboard" },
     { href: "/insights", label: "Insights" },
+    { href: "/user", label: "User" },
   ],
 }: HeaderProps) {
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -87,13 +88,13 @@ export default function Header({
           >
             Open Dashboard
           </Link>
-          <button
-            type="button"
+          <Link
+            href="/user"
             className="inline-flex h-10 w-10 items-center justify-center rounded-full text-zinc-700 transition-colors hover:bg-black/5 hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 dark:text-zinc-200 dark:hover:bg-white/10 dark:hover:text-white dark:focus-visible:ring-white/20"
-            aria-label="User account"
+            aria-label="User settings"
           >
             <UserIcon className="h-5 w-5" />
-          </button>
+          </Link>
         </div>
       </div>
 

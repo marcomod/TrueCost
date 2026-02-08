@@ -22,7 +22,7 @@ export const PRODUCTS: Product[] = [
     name: "PlayStation 5",
     type: "console",
     defaultPrice: 499.99,
-    imageUrl: "https://placehold.co/900x900/png?text=PlayStation+5",
+    imageUrl: "/products/ps5.png",
     aliases: ["ps5", "playstation 5", "play station 5"],
   },
   {
@@ -30,7 +30,7 @@ export const PRODUCTS: Product[] = [
     name: "AirPods Pro",
     type: "audio",
     defaultPrice: 249.0,
-    imageUrl: "https://placehold.co/900x900/png?text=AirPods+Pro",
+    imageUrl: "/products/airpods.png",
     aliases: ["airpods", "airpods pro", "air pods"],
   },
   {
@@ -38,7 +38,7 @@ export const PRODUCTS: Product[] = [
     name: "Nike Dunk Low",
     type: "shoes",
     defaultPrice: 115.0,
-    imageUrl: "https://placehold.co/900x900/png?text=Nike+Dunk+Low",
+    imageUrl: "/products/nikedunk.png",
     aliases: ["dunks", "nike dunks", "dunk low"],
   },
   {
@@ -46,7 +46,7 @@ export const PRODUCTS: Product[] = [
     name: "Keurig Coffee Maker",
     type: "coffee",
     defaultPrice: 129.99,
-    imageUrl: "https://placehold.co/900x900/png?text=Coffee+Maker",
+    imageUrl: "/products/coffee.png",
     aliases: ["keurig", "coffee maker", "coffee machine"],
   },
   {
@@ -54,7 +54,7 @@ export const PRODUCTS: Product[] = [
     name: "iPhone",
     type: "phone",
     defaultPrice: 799.0,
-    imageUrl: "https://placehold.co/900x900/png?text=iPhone",
+    imageUrl: "/products/iphone.png",
     aliases: ["iphone", "iphone 15", "iphone 14", "iphone 13"],
   },
   {
@@ -62,7 +62,7 @@ export const PRODUCTS: Product[] = [
     name: "Dyson Vacuum",
     type: "appliance",
     defaultPrice: 499.99,
-    imageUrl: "https://placehold.co/900x900/png?text=Dyson+Vacuum",
+    imageUrl: "/products/dyson.png",
     aliases: ["dyson", "vacuum", "vacuum cleaner"],
   },
   {
@@ -70,7 +70,7 @@ export const PRODUCTS: Product[] = [
     name: "Spotify Premium (Monthly)",
     type: "other",
     defaultPrice: 11.99,
-    imageUrl: "https://placehold.co/900x900/png?text=Spotify",
+    imageUrl: "/placeholder.svg",
     aliases: ["spotify", "spotify premium"],
   },
   {
@@ -78,7 +78,7 @@ export const PRODUCTS: Product[] = [
     name: "Netflix (Monthly)",
     type: "other",
     defaultPrice: 15.49,
-    imageUrl: "https://placehold.co/900x900/png?text=Netflix",
+    imageUrl: "/placeholder.svg",
     aliases: ["netflix"],
   },
 ];
@@ -132,7 +132,7 @@ export function lookupProduct(query: string): ProductLookupResult {
   return {
     product: null,
     displayName,
-    imageUrl: "https://placehold.co/900x900/png?text=Item",
+    imageUrl: "/placeholder.svg",
     type: "other",
     defaultPrice: null,
   };

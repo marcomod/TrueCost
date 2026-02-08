@@ -23,10 +23,10 @@ function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
-function formatMoney(amount: number) {
-  return new Intl.NumberFormat("en-US", {
+function formatMoneyWithCurrency(amount: number, currency: string) {
+  return new Intl.NumberFormat(currency === "CAD" ? "en-CA" : "en-US", {
     style: "currency",
-    currency: "USD",
+    currency,
     maximumFractionDigits: 2,
   }).format(amount);
 }
@@ -46,15 +46,20 @@ function CustomTooltip({
   payload,
   total,
   hourlyRate,
+  currency,
+  stressMultiplier,
 }: TooltipProps<number, string> & {
   total: number;
   hourlyRate: number | null;
+  currency: string;
+  stressMultiplier: number;
 }) {
   if (!active || !payload?.length) return null;
   const p = payload[0];
   const raw = typeof p.value === "number" ? p.value : 0;
   const pct = total > 0 ? (raw / total) * 100 : 0;
-  const workHours = hourlyRate && hourlyRate > 0 ? raw / hourlyRate : NaN;
+  const workHours =
+    hourlyRate && hourlyRate > 0 ? (raw / hourlyRate) * stressMultiplier : NaN;
 
   const label = (p.name as string | undefined) ?? "Category";
   const color = (p.payload as { color?: string } | undefined)?.color;
@@ -73,7 +78,7 @@ function CustomTooltip({
       <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-zinc-600 dark:text-zinc-300">
         <div>Spend</div>
         <div className="text-right font-medium text-zinc-950 dark:text-white tabular-nums">
-          {formatMoney(raw)}
+          {formatMoneyWithCurrency(raw, currency)}
         </div>
         <div>Share</div>
         <div className="text-right font-medium text-zinc-950 dark:text-white tabular-nums">
@@ -94,13 +99,20 @@ export default function DonutBreakdown({
   activeKey,
   onActiveKeyChange,
   hourlyRate,
+  currency,
+  stressMultiplier,
 }: {
   data: DonutDatum[];
   total: number;
   activeKey: string | null;
   onActiveKeyChange: (key: string | null) => void;
   hourlyRate: number | null;
+  currency: string;
+  stressMultiplier?: number;
 }) {
+  const stress = Number.isFinite(stressMultiplier ?? 1)
+    ? (stressMultiplier ?? 1)
+    : 1;
   const activeIndex = useMemo(() => {
     if (!activeKey) return -1;
     return data.findIndex((d) => d.key === activeKey);
@@ -121,7 +133,7 @@ export default function DonutBreakdown({
           <div className="text-right text-xs text-zinc-500 dark:text-zinc-400">
             Total:{" "}
             <span className="font-semibold text-zinc-950 dark:text-white tabular-nums">
-              {formatMoney(total)}
+              {formatMoneyWithCurrency(total, currency)}
             </span>
           </div>
         </div>
@@ -157,7 +169,12 @@ export default function DonutBreakdown({
               </Pie>
               <Tooltip
                 content={
-                  <CustomTooltip total={total} hourlyRate={hourlyRate} />
+                  <CustomTooltip
+                    total={total}
+                    hourlyRate={hourlyRate}
+                    currency={currency}
+                    stressMultiplier={stress}
+                  />
                 }
               />
             </PieChart>
@@ -165,7 +182,8 @@ export default function DonutBreakdown({
         </div>
 
         <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-          Work time uses an estimated hourly rate.
+          Work time uses an estimated hourly rate
+          {stress !== 1 ? ` × ${stress.toFixed(1)} stress` : ""}.
         </div>
       </div>
 
@@ -174,7 +192,9 @@ export default function DonutBreakdown({
           const pct = total > 0 ? (d.value / total) * 100 : 0;
           const active = activeKey === d.key;
           const workHours =
-            hourlyRate && hourlyRate > 0 ? d.value / hourlyRate : NaN;
+            hourlyRate && hourlyRate > 0
+              ? (d.value / hourlyRate) * stress
+              : NaN;
 
           return (
             <div
@@ -202,7 +222,7 @@ export default function DonutBreakdown({
                   </div>
                 </div>
                 <div className="text-right text-sm font-semibold text-zinc-950 dark:text-white tabular-nums">
-                  {formatMoney(d.value)}
+                  {formatMoneyWithCurrency(d.value, currency)}
                 </div>
               </div>
 

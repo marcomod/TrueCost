@@ -3,8 +3,27 @@
 import Link from "next/link";
 import Image from "next/image";
 import { PRODUCTS } from "@/lib/products.mock";
+import { getMyProfile } from "@/app/actions";
+import { useEffect, useState } from "react";
+
+function formatMoney(amount: number, currency: string) {
+  return new Intl.NumberFormat(currency === "CAD" ? "en-CA" : "en-US", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
 
 export default function SearchResults() {
+  const [currency, setCurrency] = useState("CAD");
+
+  useEffect(() => {
+    void (async () => {
+      const p = await getMyProfile();
+      setCurrency(p.settings.currency);
+    })();
+  }, []);
+
   const featured = PRODUCTS.slice(0, 6);
 
   return (
@@ -36,6 +55,7 @@ export default function SearchResults() {
                 alt={p.name}
                 width={512}
                 height={512}
+                unoptimized
                 className="h-full w-full object-contain"
               />
             </div>
@@ -44,7 +64,7 @@ export default function SearchResults() {
                 {p.name}
               </div>
               <div className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-                {p.type} • ${p.defaultPrice.toFixed(2)}
+                {p.type} • {formatMoney(p.defaultPrice, currency)}
               </div>
             </div>
           </Link>

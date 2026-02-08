@@ -1,4 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## TrueCost
+
+Fintech app that makes spending feel real by translating purchases into **Work Time**, visualizing paycheck burn, and showing “what if you invested instead?” projections.
+
+### Features
+
+- **Dashboard:** animated paycheck pulse + spending breakdown + recent expenses.
+- **Insights:** predictive signals + subscription “Danger Center” + net worth projections.
+- **Item search:** Amazon-style item page with split comparison (buy vs invest) and **Ghost Cart** (“Ghost It” instead of buying).
+- **User settings:** hourly wage, pay period, currency (CAD/USD), expected return, misery index (stress multiplier), and a theme toggle.
+
+### Tech
+
+- Next.js App Router (React)
+- Drizzle ORM + SQLite (`better-sqlite3`)
+- Tailwind v4 + Recharts
+
+## Getting started
+
+```bash
+npm install
+npm run dev
+```
+
+Open `http://localhost:3000`.
+
+## Database / migrations
+
+- SQLite file: `db.sqlite` (ignored by git)
+- Generate migration:
+
+```bash
+npm run db:generate
+```
+
+- Apply migrations:
+
+```bash
+npm run db:migrate
+```
+
+## Scripts
+
+```bash
+npm run dev
+npm run build
+npm run start
+npm run lint
+npm run db:generate
+npm run db:migrate
+```
+
+## Notes
+
+- The app defaults to a demo user until you create an account on `/user`.
+- Product images are local in `public/products/` with a fallback `public/placeholder.svg`.
 
 ## Getting Started
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/component/header";
+import ThemeScript from "@/component/ThemeScript";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,10 +23,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className="h-full" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-dvh antialiased`}
       >
+        <ThemeScript />
         <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
           <div className="absolute -top-24 left-1/2 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-sky-500/15 blur-3xl" />
           <div className="absolute top-40 left-1/4 h-[360px] w-[560px] -translate-x-1/2 rounded-full bg-fuchsia-500/10 blur-3xl" />

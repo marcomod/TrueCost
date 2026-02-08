@@ -11,10 +11,10 @@ function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
-function formatMoney(amount: number) {
-  return new Intl.NumberFormat("en-US", {
+function formatMoneyWithCurrency(amount: number, currency: string) {
+  return new Intl.NumberFormat(currency === "CAD" ? "en-CA" : "en-US", {
     style: "currency",
-    currency: "USD",
+    currency,
     maximumFractionDigits: 2,
   }).format(amount);
 }
@@ -66,10 +66,12 @@ function PaycheckPulse({
   label,
   amount,
   ratio,
+  currency,
 }: {
   label: string;
   amount: number;
   ratio: number; // 0..1
+  currency: string;
 }) {
   const pct = Math.round(clamp(ratio, 0, 1) * 100);
   const r = 22;
@@ -106,7 +108,7 @@ function PaycheckPulse({
             {label}
           </div>
           <div className="mt-2 text-3xl font-semibold text-zinc-950 dark:text-white tabular-nums">
-            {formatMoney(amount)}
+            {formatMoneyWithCurrency(amount, currency)}
           </div>
           <div className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
             {pct}% of income
@@ -250,6 +252,7 @@ export default function DashboardPage() {
   const income = summary?.income ?? 0;
   const spent = summary?.spent ?? 0;
   const remaining = summary?.remaining ?? 0;
+  const currency = summary?.currency ?? "USD";
 
   const remainingRatio = useMemo(() => {
     if (income <= 0) return 0;
@@ -281,11 +284,8 @@ export default function DashboardPage() {
       .sort((a, b) => b.value - a.value);
   }, [summary?.categoryTotals]);
 
-  const hourlyRate = useMemo(() => {
-    // Demo assumption: ~80 working hours per pay period (biweekly).
-    if (income <= 0) return null;
-    return income / 80;
-  }, [income]);
+  const hourlyRate = summary?.hourlyWage ?? null;
+  const stressMultiplier = summary?.stressMultiplier ?? 1;
 
   if (loading) return <div className="p-6">Loading dashboard...</div>;
   if (!summary) return <div className="p-6">No data</div>;
@@ -319,14 +319,14 @@ export default function DashboardPage() {
             Income (period)
           </div>
           <div className="mt-2 text-3xl font-semibold text-zinc-950 dark:text-white tabular-nums">
-            {formatMoney(animatedIncome)}
+            {formatMoneyWithCurrency(animatedIncome, currency)}
           </div>
         </div>
 
         <div className="rounded-3xl border border-black/10 bg-white/70 p-5 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
           <div className="text-sm text-zinc-500 dark:text-zinc-400">Spent</div>
           <div className="mt-2 text-3xl font-semibold text-zinc-950 dark:text-white tabular-nums">
-            {formatMoney(animatedSpent)}
+            {formatMoneyWithCurrency(animatedSpent, currency)}
           </div>
         </div>
 
@@ -334,6 +334,7 @@ export default function DashboardPage() {
           label="Remaining (pulse)"
           amount={animatedRemaining}
           ratio={remainingRatio}
+          currency={currency}
         />
       </div>
 
@@ -350,8 +351,13 @@ export default function DashboardPage() {
           <div className="text-right text-xs text-zinc-500 dark:text-zinc-400">
             Work time assumes ~
             <span className="font-semibold text-zinc-950 dark:text-white">
-              {hourlyRate ? ` ${formatMoney(hourlyRate)}/hr` : " —"}
+              {hourlyRate
+                ? ` ${formatMoneyWithCurrency(hourlyRate, currency)}/hr`
+                : " —"}
             </span>
+            {stressMultiplier !== 1 && (
+              <span className="tabular-nums"> × {stressMultiplier.toFixed(1)} stress</span>
+            )}
           </div>
         </div>
 
@@ -366,6 +372,8 @@ export default function DashboardPage() {
             activeKey={activeCategoryKey}
             onActiveKeyChange={setActiveCategoryKey}
             hourlyRate={hourlyRate}
+            currency={currency}
+            stressMultiplier={stressMultiplier}
           />
         )}
       </div>
@@ -390,7 +398,7 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-center gap-3">
                 <div className="text-sm font-semibold text-zinc-950 dark:text-white tabular-nums">
-                  ${(expense.amount ?? 0).toFixed(2)}
+                  {formatMoneyWithCurrency(expense.amount ?? 0, currency)}
                 </div>
                 <button
                   type="button"

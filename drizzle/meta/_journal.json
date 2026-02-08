@@ -15,6 +15,27 @@
       "when": 1770522967854,
       "tag": "0001_curvy_true_believers",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1770577088837,
+      "tag": "0002_early_nextwave",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1770578132845,
+      "tag": "0003_spicy_frog_thor",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1770578835081,
+      "tag": "0004_ordinary_madripoor",
+      "breakpoints": true
     }
   ]
 }

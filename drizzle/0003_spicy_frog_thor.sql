@@ -1,0 +1,1 @@
+ALTER TABLE `user_settings` ADD `job_satisfaction` integer DEFAULT 7 NOT NULL;
