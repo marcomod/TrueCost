@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { lookupProduct } from "@/lib/products.mock";
-import { useMemo, useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 
 function formatMoney(amount: number) {
   return new Intl.NumberFormat("en-US", {
@@ -72,16 +72,61 @@ function Sparkline({
   );
 }
 
-export default function ItemPage({ params }: { params: { query: string } }) {
+export default function ItemPage({
+  params,
+}: {
+  params: Promise<{ query: string }>;
+}) {
+  // Next.js 16 can pass params as a Promise (sync dynamic APIs).
+  const { query } = use(params);
+
   const decoded = useMemo(() => {
     try {
-      return decodeURIComponent(params.query);
+      return decodeURIComponent(query);
     } catch {
-      return params.query;
+      return query;
     }
-  }, [params.query]);
+  }, [query]);
 
+  return <ItemPageInner key={decoded} decoded={decoded} />;
+}
+
+function ItemPageInner({ decoded }: { decoded: string }) {
   const info = useMemo(() => lookupProduct(decoded), [decoded]);
+  const [liveImage, setLiveImage] = useState<{ q: string; url: string } | null>(
+    null,
+  );
+
+  useEffect(() => {
+    const q = decoded.trim();
+    if (!q) return;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/image?q=${encodeURIComponent(q)}`, {
+          signal: controller.signal,
+        });
+        if (!res.ok) return;
+        const data = (await res.json()) as { imageUrl?: string | null };
+        if (typeof data.imageUrl === "string" && data.imageUrl) {
+          setLiveImage({ q: decoded, url: data.imageUrl });
+        } else {
+          setLiveImage(null);
+        }
+      } catch {
+        setLiveImage(null);
+      }
+    }, 250);
+
+    return () => {
+      controller.abort();
+      clearTimeout(timeout);
+    };
+  }, [decoded]);
+
+  const imageUrl =
+    (liveImage?.q === decoded ? liveImage.url : null) ?? info.imageUrl;
 
   const [priceMode, setPriceMode] = useState<"auto" | "manual">(
     info.defaultPrice == null ? "manual" : "auto",
@@ -121,7 +166,7 @@ export default function ItemPage({ params }: { params: { query: string } }) {
           <div className="lg:col-span-3 rounded-3xl border border-black/10 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
             <div className="aspect-square w-full overflow-hidden rounded-2xl bg-black/5 dark:bg-white/5">
               <Image
-                src={info.imageUrl}
+                src={imageUrl}
                 alt={info.displayName}
                 width={1000}
                 height={1000}
